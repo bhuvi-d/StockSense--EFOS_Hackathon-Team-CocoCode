@@ -6,26 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
-import { Loader2 } from "lucide-react"
-
-type AnalyzeResponse = {
-  sentiment_score: number
-  sentiment_label: "Positive" | "Neutral" | "Negative"
-  issues: string[]
-  strengths: string[]
-  improvements: string[]
-  confidence: number
-  demand: number
-  reorder: number
-  risk: "Low" | "Medium" | "High" | "Critical"
-  email: string
-  restock_plan: string
-  explanation: string
-}
+import { Loader2, AlertCircle } from "lucide-react"
+import { useAnalysis } from "@/context/analysis-context"
 
 export function InputForm() {
   const router = useRouter()
+  const { setData } = useAnalysis()
   const [isLoading, setIsLoading] = React.useState(false)
+  const [error, setError] = React.useState<string | null>(null)
   const [formData, setFormData] = React.useState({
     productName: "",
     currentStock: "",
@@ -35,37 +23,43 @@ export function InputForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    setError(null)
     
     try {
-      const stock = Number(formData.currentStock)
-      const reviews = formData.customerReviews
+      const reviewsArray = formData.customerReviews
         .split("\n")
-        .map((r) => r.trim())
-        .filter((r) => r.length > 0)
+        .map(r => r.trim())
+        .filter(r => r.length > 0)
 
-      const res = await fetch("/api/analyze", {
+      if (reviewsArray.length === 0) {
+        throw new Error("Please enter at least one customer review.")
+      }
+
+      const response = await fetch("/api/analyze", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           productName: formData.productName,
-          stock,
-          reviews,
+          stock: parseInt(formData.currentStock, 10),
+          reviews: reviewsArray,
         }),
       })
 
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ error: "Unknown error" }))
-        alert(`Error: ${errorData.error || "Failed to analyze"}`)
-        setIsLoading(false)
-        return
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || "Something went wrong. Try again.")
       }
 
-      const data: AnalyzeResponse = await res.json()
-      const encoded = encodeURIComponent(JSON.stringify(data))
-      router.push(`/dashboard?data=${encoded}&product=${encodeURIComponent(formData.productName)}`)
+      const data = await response.json()
+      setData({
+        ...data,
+        productName: formData.productName,
+      })
+      router.push("/dashboard")
     } catch (err) {
-      console.error(err)
-      alert("An error occurred. Please try again.")
+      setError(err instanceof Error ? err.message : "Something went wrong. Try again.")
       setIsLoading(false)
     }
   }
@@ -82,6 +76,12 @@ export function InputForm() {
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
+          {error && (
+            <div className="p-3 rounded-md bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm flex items-start gap-2 animate-in fade-in slide-in-from-top-1">
+              <AlertCircle className="h-4 w-4 mt-0.5" />
+              <span>{error}</span>
+            </div>
+          )}
           <div className="space-y-2">
             <label htmlFor="productName" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
               Product Name
@@ -90,6 +90,7 @@ export function InputForm() {
               id="productName"
               placeholder="e.g. Wireless Noise Cancelling Headphones"
               required
+              disabled={isLoading}
               value={formData.productName}
               onChange={(e) => setFormData({ ...formData, productName: e.target.value })}
               className="bg-zinc-50/50 dark:bg-zinc-900/50"
@@ -104,6 +105,7 @@ export function InputForm() {
               type="number"
               placeholder="e.g. 50"
               required
+              disabled={isLoading}
               value={formData.currentStock}
               onChange={(e) => setFormData({ ...formData, currentStock: e.target.value })}
               className="bg-zinc-50/50 dark:bg-zinc-900/50"
@@ -117,6 +119,7 @@ export function InputForm() {
               id="customerReviews"
               placeholder="Paste customer reviews here (one per line or as a paragraph)..."
               required
+              disabled={isLoading}
               value={formData.customerReviews}
               onChange={(e) => setFormData({ ...formData, customerReviews: e.target.value })}
               className="min-h-[150px] bg-zinc-50/50 dark:bg-zinc-900/50"

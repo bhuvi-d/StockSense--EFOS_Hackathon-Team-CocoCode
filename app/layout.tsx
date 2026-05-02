@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   description: "AI-powered inventory analysis and demand forecasting based on customer reviews.",
 };
 
+import { AnalysisProvider } from "@/context/analysis-context";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -27,7 +29,11 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <AnalysisProvider>
+          {children}
+        </AnalysisProvider>
+      </body>
     </html>
   );
 }

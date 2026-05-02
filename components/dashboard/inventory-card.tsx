@@ -1,21 +1,22 @@
+"use client"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { PackageSearch } from "lucide-react"
+import { useAnalysis } from "@/context/analysis-context"
 
-type InventoryCardProps = {
-  reorder: number
-  risk: "Low" | "Medium" | "High" | "Critical"
-}
-
-export function InventoryCard({ reorder, risk }: InventoryCardProps) {
-  const badgeColor =
-    risk === "Critical"
-      ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-      : risk === "High"
-        ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
-        : risk === "Medium"
-          ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
-          : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+export function InventoryCard() {
+  const { data } = useAnalysis()
+  
+  const reorder = data?.reorder ?? 0
+  const risk = data?.risk ?? "Low"
+  
+  const riskColors = {
+    Low: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800",
+    Medium: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200 dark:border-orange-800",
+    High: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800",
+    Critical: "bg-red-500 text-white dark:bg-red-600 dark:text-white border-red-600",
+  }
 
   return (
     <Card className="border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-950">
@@ -26,7 +27,7 @@ export function InventoryCard({ reorder, risk }: InventoryCardProps) {
       <CardContent>
         <div className="flex items-center justify-between">
           <div className="text-3xl font-bold">{reorder} units</div>
-          <Badge variant="secondary" className={badgeColor}>
+          <Badge variant="outline" className={`${riskColors[risk]} border font-bold px-2 py-0.5`}>
             {risk} Risk
           </Badge>
         </div>
