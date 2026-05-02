@@ -133,7 +133,7 @@ async function callGroqForInsights(params: {
   reviews: string[];
   timeoutMs: number;
 }): Promise<LlmInsights> {
-  const apiKey = (globalThis as any)?.process?.env?.GROQ_API_KEY as string | undefined;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     return heuristicInsights(params.reviews);
   }
@@ -160,7 +160,7 @@ async function callGroqForInsights(params: {
   const body = {
     model: "llama-3.3-70b-versatile",
     temperature: 0.2,
-    max_tokens: 500,
+    max_tokens: 800,
     messages: [
       { role: "system", content: "Return only strict JSON." },
       { role: "user", content: prompt },
@@ -317,8 +317,8 @@ export async function POST(req: Request) {
   if (!isNonEmptyString(productName)) {
     return NextResponse.json({ error: "productName is required" }, { status: 400 });
   }
-  if (typeof stock !== "number" || Number.isNaN(stock)) {
-    return NextResponse.json({ error: "stock must be a number" }, { status: 400 });
+  if (typeof stock !== "number" || Number.isNaN(stock) || stock < 0) {
+    return NextResponse.json({ error: "stock must be a non-negative number" }, { status: 400 });
   }
   if (!isStringArray(reviews) || reviews.length === 0 || reviews.every((r) => !isNonEmptyString(r))) {
     return NextResponse.json({ error: "reviews must be a non-empty array" }, { status: 400 });
@@ -332,7 +332,7 @@ export async function POST(req: Request) {
   const insights = await callGroqForInsights({
     productName,
     reviews: cleanReviews,
-    timeoutMs: 1800,
+    timeoutMs: 5000,
   });
 
   const demand = calculateDemand(insights.sentiment_score);
