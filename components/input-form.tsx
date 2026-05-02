@@ -8,6 +8,21 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 
+type AnalyzeResponse = {
+  sentiment_score: number
+  sentiment_label: "Positive" | "Neutral" | "Negative"
+  issues: string[]
+  strengths: string[]
+  improvements: string[]
+  confidence: number
+  demand: number
+  reorder: number
+  risk: "Low" | "Medium" | "High" | "Critical"
+  email: string
+  restock_plan: string
+  explanation: string
+}
+
 export function InputForm() {
   const router = useRouter()
   const [isLoading, setIsLoading] = React.useState(false)
@@ -21,12 +36,38 @@ export function InputForm() {
     e.preventDefault()
     setIsLoading(true)
     
-    // Simulate API call/loading
-    setTimeout(() => {
-      // In a real app, we might store this in a context or pass via query params
-      // For Phase 1, we'll just navigate to /dashboard
-      router.push("/dashboard")
-    }, 2000)
+    try {
+      const stock = Number(formData.currentStock)
+      const reviews = formData.customerReviews
+        .split("\n")
+        .map((r) => r.trim())
+        .filter((r) => r.length > 0)
+
+      const res = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productName: formData.productName,
+          stock,
+          reviews,
+        }),
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ error: "Unknown error" }))
+        alert(`Error: ${errorData.error || "Failed to analyze"}`)
+        setIsLoading(false)
+        return
+      }
+
+      const data: AnalyzeResponse = await res.json()
+      const encoded = encodeURIComponent(JSON.stringify(data))
+      router.push(`/dashboard?data=${encoded}&product=${encodeURIComponent(formData.productName)}`)
+    } catch (err) {
+      console.error(err)
+      alert("An error occurred. Please try again.")
+      setIsLoading(false)
+    }
   }
 
   return (
