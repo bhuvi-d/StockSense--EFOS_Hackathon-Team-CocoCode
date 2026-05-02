@@ -1,0 +1,199 @@
+{
+  "products": [
+    {
+      "name": "Sony WH-1000XM5 Headphones",
+      "stock": 35,
+      "reviews": [
+        "Absolutely love these headphones! The noise cancellation is the best I've ever experienced. Worth every penny.",
+        "Incredible sound quality and the battery lasts forever. I use them daily for work calls and music.",
+        "Best headphones I've owned. The comfort is unmatched even after wearing for 8 hours straight.",
+        "The ANC on these is phenomenal. Completely blocks out office noise. Highly recommend!",
+        "Sound is crisp and balanced. The bass is deep without being overwhelming. Perfect for music lovers.",
+        "Premium build quality and the touch controls are super responsive. Sony nailed it with this one.",
+        "Great for travel — lightweight, folds flat, and the carry case is excellent. 5 stars!",
+        "The multipoint connection is a game changer. Switches seamlessly between my phone and laptop."
+      ]
+    },
+    {
+      "name": "Samsung Galaxy S24 Ultra",
+      "stock": 60,
+      "reviews": [
+        "The camera on this phone is insane. Night mode photos look professional. Love the zoom capabilities.",
+        "S Pen integration is smooth and the display is gorgeous. Best Samsung phone yet.",
+        "Battery easily lasts a full day of heavy use. The titanium frame feels premium and durable.",
+        "AI features are actually useful — real-time translation and photo editing are standout features.",
+        "Great phone overall but runs a bit warm during gaming sessions. Not a dealbreaker though.",
+        "The flat display is a welcome change. No more accidental edge touches. Very happy with this upgrade.",
+        "Excellent performance but the price is steep. Should come with faster charging at this price point."
+      ]
+    },
+    {
+      "name": "Apple MacBook Air M3",
+      "stock": 25,
+      "reviews": [
+        "This laptop is a beast! The M3 chip handles everything I throw at it — video editing, coding, you name it.",
+        "Battery life is unreal. I get 16+ hours on a single charge. Perfect for working on the go.",
+        "So thin and light yet incredibly powerful. Best laptop I've ever used, hands down.",
+        "The Liquid Retina display is stunning. Colors are vibrant and text is razor sharp.",
+        "Silent operation — no fan noise at all. The build quality is exceptional as always from Apple.",
+        "Wish it had more ports. Two USB-C ports is limiting. Had to buy a hub separately.",
+        "Fantastic machine but the base storage of 256GB is too small. Had to upgrade and it gets expensive."
+      ]
+    },
+    {
+      "name": "JBL Flip 6 Bluetooth Speaker",
+      "stock": 80,
+      "reviews": [
+        "Amazing sound for such a compact speaker! The bass punches way above its size.",
+        "Took it to the beach and it survived sand and water no problem. Rugged and reliable.",
+        "Great speaker for the price. Sound is clear and loud enough for outdoor gatherings.",
+        "Battery lasts about 10 hours which is decent. USB-C charging is a nice upgrade from the Flip 5.",
+        "Solid speaker but the midrange could be better. Fine for casual listening though.",
+        "Perfect for pool parties. The waterproofing actually works — dropped it in water and it kept playing."
+      ]
+    },
+    {
+      "name": "Dyson V15 Detect Vacuum",
+      "stock": 15,
+      "reviews": [
+        "This vacuum is incredible. The laser detects dust you didn't even know was there. Mind blown.",
+        "Suction power is unmatched. My carpets have never been cleaner. Worth the premium price.",
+        "The LCD screen showing particle counts is actually useful. You can see when an area is truly clean.",
+        "Battery lasts about 40 minutes on medium power. Enough for my apartment but not a full house.",
+        "Very expensive but the engineering is top-notch. Feels like a premium product in every way.",
+        "The hair screw tool works great on pet hair. My golden retriever's shedding is finally manageable.",
+        "Heavy for extended use. My wrist gets tired after 15 minutes of ceiling cleaning.",
+        "Replacement parts and filters are ridiculously expensive. Be prepared for ongoing costs."
+      ]
+    },
+    {
+      "name": "Nike Air Max 270 Running Shoes",
+      "stock": 45,
+      "reviews": [
+        "Super comfortable right out of the box. No break-in period needed. Great for daily wear.",
+        "The Air Max cushioning is like walking on clouds. My knees thank me after long days.",
+        "Stylish design that goes with everything. Get compliments every time I wear them.",
+        "Decent for light jogging but not ideal for serious running. More of a lifestyle shoe.",
+        "The mesh upper is breathable but not very durable. Got a hole after 4 months of daily wear.",
+        "Runs a bit narrow. If you have wide feet, go half a size up for comfort."
+      ]
+    },
+    {
+      "name": "Instant Pot Duo 7-in-1 Pressure Cooker",
+      "stock": 100,
+      "reviews": [
+        "This thing changed my life. I can make meals in a fraction of the time. Soups, stews, rice — all perfect.",
+        "Very versatile — I use it as a pressure cooker, slow cooker, and rice cooker. Replaced 3 appliances.",
+        "Easy to use once you learn the basics. The stainless steel inner pot is durable and dishwasher safe.",
+        "Safety features are solid. Never had any issues with pressure release. Feels well-engineered.",
+        "Great product but the instruction manual is terrible. Had to watch YouTube tutorials to learn it.",
+        "The keep-warm function is handy. Food stays at perfect temperature for hours without overcooking."
+      ]
+    },
+    {
+      "name": "Logitech MX Master 3S Mouse",
+      "stock": 40,
+      "reviews": [
+        "The best mouse I've ever used. The MagSpeed scroll wheel is incredibly fast and precise.",
+        "Ergonomic design is perfect. No wrist pain even after 10-hour coding sessions.",
+        "Works flawlessly on any surface including glass. The 8K DPI sensor is outstanding.",
+        "Multi-device workflow is seamless. Switch between 3 computers with one button press.",
+        "Battery lasts months on a single charge. USB-C quick charge gives 3 hours of use in 1 minute.",
+        "A bit heavy for gaming but for productivity work, this is the gold standard.",
+        "Pricey but worth every cent. This is a professional-grade tool that actually improves productivity."
+      ]
+    },
+    {
+      "name": "CheapTech Wireless Earbuds Pro",
+      "stock": 200,
+      "reviews": [
+        "Terrible sound quality. Everything sounds muffled like listening through a wall. Very disappointed.",
+        "Bluetooth keeps disconnecting every 10 minutes. Unusable for calls or music. Returning these.",
+        "The fit is awful — they keep falling out of my ears even with the largest tips provided.",
+        "Battery barely lasts 2 hours. The charging case takes forever to recharge them too.",
+        "Waste of money. You get what you pay for. Spend a bit more and get something decent.",
+        "The touch controls are unresponsive. Have to tap multiple times to pause or skip tracks.",
+        "Microphone quality is nonexistent. Everyone on calls says I sound like I'm in a tunnel.",
+        "One earbud stopped working after 2 weeks. Customer service hasn't responded to my emails."
+      ]
+    },
+    {
+      "name": "FitBit Charge 6 Fitness Tracker",
+      "stock": 55,
+      "reviews": [
+        "Good fitness tracker for the price. Step counting and heart rate monitoring are accurate enough.",
+        "The sleep tracking feature is really helpful. I've improved my sleep habits using the data.",
+        "Works well for basic fitness tracking but the GPS is slow to connect on outdoor runs.",
+        "Decent for everyday health monitoring. The stress management feature is surprisingly useful.",
+        "Battery lasts about 5 days which is okay. Wish it charged faster though — takes over an hour.",
+        "The small screen makes reading notifications difficult. Fine for quick glances at stats though.",
+        "Good value but the app keeps crashing on my Android phone. iOS version seems more stable."
+      ]
+    },
+    {
+      "name": "KitchenAid Artisan Stand Mixer",
+      "stock": 20,
+      "reviews": [
+        "An absolute kitchen essential. Makes baking so much easier and more enjoyable. Beautiful design too.",
+        "Powerful motor handles heavy dough without struggling. The 5-quart bowl is the perfect size.",
+        "Built like a tank. My mother's KitchenAid is 20 years old and still going strong. These last forever.",
+        "The attachment ecosystem is incredible. I have the pasta roller and meat grinder — both work great.",
+        "Expensive upfront but worth every penny when you consider it'll last decades. True investment piece.",
+        "A bit heavy and takes up counter space but the performance makes up for it. Wouldn't trade it.",
+        "The pouring shield is useless — ingredients still fly everywhere. But the mixer itself is perfect."
+      ]
+    },
+    {
+      "name": "BudgetHome Smart LED Bulbs (4-Pack)",
+      "stock": 150,
+      "reviews": [
+        "These bulbs are garbage. The app crashes every time I try to change colors. Totally unreliable.",
+        "Connection drops constantly. Half the time the bulbs don't respond to commands. Very frustrating.",
+        "Colors are nowhere near as vibrant as shown in the product photos. Dull and washed out.",
+        "One of the four bulbs was dead on arrival. Replacement took 3 weeks to arrive. Poor quality control.",
+        "The white light is decent but that's about the only positive. Smart features are basically non-functional.",
+        "Wish I had spent more on Philips Hue instead. You really do get what you pay for with smart bulbs.",
+        "Setup process is confusing and the instructions are poorly translated. Took me an hour to get working.",
+        "They work okay as basic bulbs but the 'smart' features are a joke. Alexa integration barely functions."
+      ]
+    },
+    {
+      "name": "Dell XPS 15 Laptop",
+      "stock": 30,
+      "reviews": [
+        "Stunning 4K OLED display. Best screen I've seen on a laptop. Color accuracy is incredible for photo editing.",
+        "Performance is solid with the i7 and 32GB RAM. Handles Adobe Creative Suite without breaking a sweat.",
+        "Build quality is premium — the carbon fiber palm rest feels great and the aluminum lid is gorgeous.",
+        "The trackpad is smooth and responsive. Almost MacBook-level which is high praise for a Windows laptop.",
+        "Fans get loud under load. Thermal throttling kicks in during sustained workloads. Could be better.",
+        "Webcam quality is mediocre at best. Not great for video calls in low light. Disappointing at this price.",
+        "Excellent laptop for creative professionals. The display alone makes it worth considering."
+      ]
+    },
+    {
+      "name": "HydroFlask Wide Mouth Water Bottle",
+      "stock": 90,
+      "reviews": [
+        "Keeps my water ice cold for 24+ hours. Even left it in a hot car and it was still cold. Impressive!",
+        "Durable and looks great. The powder coat finish hasn't chipped after months of daily use.",
+        "Love the wide mouth — easy to add ice cubes and clean. The flex cap doesn't leak at all.",
+        "A bit heavy when full but that's the trade-off for excellent insulation. Worth it.",
+        "The color options are beautiful. I get compliments on my Stone color bottle all the time.",
+        "Good bottle but way overpriced for what it is. Similar performance available for half the price."
+      ]
+    },
+    {
+      "name": "Ring Video Doorbell 4",
+      "stock": 70,
+      "reviews": [
+        "Great security addition to our home. The video quality is clear and the motion detection works well.",
+        "Pre-roll feature is super useful — you can see what happened before the motion was triggered. Nice upgrade.",
+        "Easy to install and set up. The app is intuitive and notifications are prompt.",
+        "Subscription is basically required. Without Ring Protect, you can't review past recordings. Annoying.",
+        "Works well overall but there's a slight delay in two-way talk. Conversations feel a bit unnatural.",
+        "Night vision is decent but not amazing. Can clearly see faces within about 10 feet.",
+        "Good product but the monthly subscription cost adds up. Consider that before buying."
+      ]
+    }
+  ]
+}

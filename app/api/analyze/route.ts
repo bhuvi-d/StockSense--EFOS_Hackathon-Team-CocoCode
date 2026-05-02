@@ -139,7 +139,7 @@ async function callGroqForInsights(params: {
   }
 
   const prompt =
-    "You are an expert product review analyst. Analyze ALL reviews together and output ONLY valid JSON matching this exact schema with no extra keys:\n" +
+    "You are an expert e-commerce product review analyst. These are real customer reviews from an online marketplace. Analyze ALL reviews together and output ONLY valid JSON matching this exact schema with no extra keys:\n" +
     "{\n" +
     "  \"sentiment_score\": number,\n" +
     "  \"sentiment_label\": \"Positive\"|\"Neutral\"|\"Negative\",\n" +
@@ -149,11 +149,14 @@ async function callGroqForInsights(params: {
     "  \"confidence\": number\n" +
     "}\n\n" +
     "Rules:\n" +
-    "- sentiment_score MUST be between -1 and +1.\n" +
-    "- confidence MUST be between 0 and 1, based on number of reviews and consistency.\n" +
-    "- Use concise strings.\n" +
+    "- sentiment_score MUST be between -1 and +1. Positive reviews push toward +1, negative toward -1.\n" +
+    "- confidence MUST be between 0 and 1, based on number of reviews and sentiment consistency. More reviews = higher confidence.\n" +
+    "- issues: extract specific product problems mentioned by customers (e.g. 'battery life', 'build quality').\n" +
+    "- strengths: extract specific product advantages praised by customers (e.g. 'sound quality', 'comfort').\n" +
+    "- improvements: suggest actionable product improvements based on review feedback.\n" +
+    "- Use concise, specific strings — not generic statements.\n" +
     "- Output ONLY JSON (no markdown, no commentary).\n\n" +
-    `Product: ${params.productName}\n\nReviews:\n${params.reviews
+    `Product: ${params.productName}\nReal Customer Reviews:\n${params.reviews
       .map((r, i) => `${i + 1}. ${r}`)
       .join("\n")}`;
 
@@ -324,14 +327,16 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "reviews must be a non-empty array" }, { status: 400 });
   }
 
-  const cleanReviews = reviews.map((r) => r.trim()).filter((r) => r.length > 0);
+  const cleanReviews = [...new Set(reviews.map((r) => r.trim()).filter((r) => r.length > 0))];
   if (cleanReviews.length === 0) {
     return NextResponse.json({ error: "reviews must be a non-empty array" }, { status: 400 });
   }
 
+  const limitedReviews = cleanReviews.slice(0, 10);
+
   const insights = await callGroqForInsights({
     productName,
-    reviews: cleanReviews,
+    reviews: limitedReviews,
     timeoutMs: 5000,
   });
 

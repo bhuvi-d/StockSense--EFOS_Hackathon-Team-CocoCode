@@ -19,6 +19,9 @@ export interface AnalysisData {
   email: string
   restock_plan: string
   explanation: string
+  reviewCount: number
+  isRealData: boolean
+  analyzedAt: string
 }
 
 interface AnalysisContextType {

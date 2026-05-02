@@ -6,19 +6,40 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
-import { Loader2, AlertCircle } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Loader2, AlertCircle, Database } from "lucide-react"
 import { useAnalysis } from "@/context/analysis-context"
+import productsData from "@/data/products.json"
 
 export function InputForm() {
   const router = useRouter()
   const { setData } = useAnalysis()
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
+  const [selectedProduct, setSelectedProduct] = React.useState("")
+  const [isRealData, setIsRealData] = React.useState(false)
   const [formData, setFormData] = React.useState({
     productName: "",
     currentStock: "",
     customerReviews: "",
   })
+
+  const handleProductSelect = (name: string) => {
+    setSelectedProduct(name)
+    if (!name) {
+      setIsRealData(false)
+      return
+    }
+    const product = productsData.products.find((p) => p.name === name)
+    if (product) {
+      setFormData({
+        productName: product.name,
+        currentStock: String(product.stock),
+        customerReviews: product.reviews.join("\n"),
+      })
+      setIsRealData(true)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -56,6 +77,9 @@ export function InputForm() {
       setData({
         ...data,
         productName: formData.productName,
+        reviewCount: reviewsArray.length,
+        isRealData,
+        analyzedAt: new Date().toISOString(),
       })
       router.push("/dashboard")
     } catch (err) {
@@ -82,6 +106,29 @@ export function InputForm() {
               <span>{error}</span>
             </div>
           )}
+          <div className="space-y-2">
+            <label htmlFor="productSelect" className="text-sm font-medium text-zinc-700 dark:text-zinc-300 flex items-center gap-2">
+              <Database className="h-3.5 w-3.5 text-indigo-500" />
+              Choose Sample Product
+            </label>
+            <select
+              id="productSelect"
+              value={selectedProduct}
+              onChange={(e) => handleProductSelect(e.target.value)}
+              disabled={isLoading}
+              className="w-full h-9 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 px-3 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <option value="">— Or enter manually below —</option>
+              {productsData.products.map((p) => (
+                <option key={p.name} value={p.name}>{p.name} ({p.reviews.length} reviews)</option>
+              ))}
+            </select>
+            {isRealData && (
+              <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-[10px]">
+                Using real customer review data
+              </Badge>
+            )}
+          </div>
           <div className="space-y-2">
             <label htmlFor="productName" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
               Product Name

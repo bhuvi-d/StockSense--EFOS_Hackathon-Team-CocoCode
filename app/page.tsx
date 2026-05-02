@@ -16,7 +16,7 @@ export default function Home() {
       <InputForm />
       
       <div className="mt-12 text-sm text-zinc-500 dark:text-zinc-500">
-        Phase 1 • AI-Powered Inventory Intelligence
+        Phase 4 • AI-Powered Inventory Intelligence • Real Data Integration
       </div>
     </main>
   )
