@@ -77,6 +77,7 @@ export function InputForm() {
       setData({
         ...data,
         productName: formData.productName,
+        stock: parseInt(formData.currentStock, 10),
         reviewCount: reviewsArray.length,
         isRealData,
         analyzedAt: new Date().toISOString(),

@@ -6,6 +6,9 @@ import { InventoryCard } from "@/components/dashboard/inventory-card"
 import { InsightsCard } from "@/components/dashboard/insights-card"
 import { ActionsCard } from "@/components/dashboard/actions-card"
 import { ExplanationCard } from "@/components/dashboard/explanation-card"
+import { StockoutCard } from "@/components/dashboard/stockout-card"
+import { WhatIfCard } from "@/components/dashboard/what-if-card"
+import { BenchmarkCard } from "@/components/dashboard/benchmark-card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
@@ -127,6 +130,9 @@ export default function DashboardPage() {
           <motion.div variants={item}><SentimentCard /></motion.div>
           <motion.div variants={item}><DemandCard /></motion.div>
           <motion.div variants={item}><InventoryCard /></motion.div>
+          <motion.div variants={item}><StockoutCard /></motion.div>
+          <motion.div variants={item}><WhatIfCard /></motion.div>
+          <motion.div variants={item}><BenchmarkCard /></motion.div>
           
           <motion.div variants={item} className="lg:col-span-2">
             <InsightsCard />

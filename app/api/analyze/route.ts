@@ -25,6 +25,12 @@ type AnalyzeResponse = LlmInsights & {
   email: string;
   restock_plan: string;
   explanation: string;
+  daily_burn_rate: number;
+  stockout_days: number;
+  stockout_date: string;
+  sentiment_rank: number;
+  sentiment_percentile: number;
+  total_products_compared: number;
 };
 
 function clamp(n: number, min: number, max: number) {
@@ -305,6 +311,34 @@ function generateExplanation(params: {
   return `Sentiment is ${scoreStr} driving estimated demand of ${params.demand} vs current stock ${params.stock}. Current stock is sufficient, so no reorder is required (risk: ${params.risk}).`;
 }
 
+function calculateStockout(demand: number, stock: number): { daily_burn_rate: number; stockout_days: number; stockout_date: string } {
+  const daily_burn_rate = Math.max(0.1, demand / 30);
+  if (stock === 0) {
+    return { daily_burn_rate: Math.round(daily_burn_rate * 10) / 10, stockout_days: 0, stockout_date: new Date().toISOString().split("T")[0] };
+  }
+  const stockout_days = Math.floor(stock / daily_burn_rate);
+  const stockoutDate = new Date();
+  stockoutDate.setDate(stockoutDate.getDate() + stockout_days);
+  return {
+    daily_burn_rate: Math.round(daily_burn_rate * 10) / 10,
+    stockout_days,
+    stockout_date: stockoutDate.toISOString().split("T")[0],
+  };
+}
+
+function calculateBenchmark(sentimentScore: number): { sentiment_rank: number; sentiment_percentile: number; total_products_compared: number } {
+  const referenceScores = [
+    0.95, 0.85, 0.80, 0.75, 0.70, 0.65, 0.60, 0.55, 0.50, 0.45,
+    0.40, 0.35, 0.30, 0.25, 0.20, 0.15, 0.10, 0.05, 0.0, -0.05,
+    -0.10, -0.15, -0.20, -0.30, -0.40, -0.50, -0.60, -0.70, -0.80, -0.90,
+  ];
+  const allScores = [...referenceScores, sentimentScore].sort((a, b) => b - a);
+  const rank = allScores.indexOf(sentimentScore) + 1;
+  const total = allScores.length;
+  const percentile = Math.round(((total - rank) / (total - 1)) * 100);
+  return { sentiment_rank: rank, sentiment_percentile: percentile, total_products_compared: total };
+}
+
 export async function POST(req: Request) {
   let body: AnalyzeRequestBody;
   try {
@@ -342,6 +376,8 @@ export async function POST(req: Request) {
 
   const demand = calculateDemand(insights.sentiment_score);
   const { reorder, risk } = calculateInventory(demand, stock);
+  const stockout = calculateStockout(demand, stock);
+  const benchmark = calculateBenchmark(insights.sentiment_score);
 
   const email = generateSupplierEmail({ productName, reorder, risk });
   const restock_plan = generateRestockPlan({ reorder, risk });
@@ -366,6 +402,12 @@ export async function POST(req: Request) {
     email,
     restock_plan,
     explanation,
+    daily_burn_rate: stockout.daily_burn_rate,
+    stockout_days: stockout.stockout_days,
+    stockout_date: stockout.stockout_date,
+    sentiment_rank: benchmark.sentiment_rank,
+    sentiment_percentile: benchmark.sentiment_percentile,
+    total_products_compared: benchmark.total_products_compared,
   };
 
   return NextResponse.json(response);
