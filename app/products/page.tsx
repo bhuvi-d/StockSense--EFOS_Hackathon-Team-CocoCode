@@ -4,6 +4,7 @@ import * as React from "react"
 import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Search, Package, ArrowRight, Loader2, Database } from "lucide-react"
 import { motion } from "framer-motion"
@@ -56,6 +57,9 @@ export default function ProductsPage() {
 
   return (
     <main className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-4 sm:p-8">
+      <div className="fixed top-6 right-6 z-50">
+        <ThemeToggle />
+      </div>
       <div className="max-w-7xl mx-auto space-y-12">
         <div className="text-center space-y-4">
           <motion.h1 

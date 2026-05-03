@@ -17,6 +17,7 @@ import { motion } from "framer-motion"
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import { useAnalysis } from "@/context/analysis-context"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 const container = {
   hidden: { opacity: 0 },
@@ -205,6 +206,7 @@ export default function DashboardPage() {
             <Button className="bg-orange-600 hover:bg-orange-700 text-white dark:bg-orange-500 dark:hover:bg-orange-600" onClick={() => router.push("/")}>
               New Analysis
             </Button>
+            <ThemeToggle />
           </div>
         </motion.div>
 

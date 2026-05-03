@@ -2,10 +2,14 @@ import { InputForm } from "@/components/input-form"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Database, ArrowRight, Sparkles } from "lucide-react"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex flex-col items-center justify-center p-4 sm:p-8 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-orange-100 via-zinc-50 to-zinc-50 dark:from-orange-950/20 dark:via-zinc-950 dark:to-zinc-950">
+      <div className="fixed top-6 right-6 z-50">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-4xl space-y-8 text-center mb-8">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 text-xs font-bold uppercase tracking-widest">
           <Sparkles className="h-3 w-3" />
