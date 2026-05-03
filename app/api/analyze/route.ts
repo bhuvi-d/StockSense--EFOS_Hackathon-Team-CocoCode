@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 type AnalyzeRequestBody = {
   productName: string;
@@ -31,6 +34,7 @@ type AnalyzeResponse = LlmInsights & {
   sentiment_rank: number;
   sentiment_percentile: number;
   total_products_compared: number;
+  email_triggered: boolean;
 };
 
 function clamp(n: number, min: number, max: number) {
@@ -87,31 +91,8 @@ function normalizeInsights(raw: unknown): LlmInsights | null {
 function heuristicInsights(reviews: string[]): LlmInsights {
   const text = reviews.join(" \n").toLowerCase();
 
-  const positiveWords = [
-    "love",
-    "great",
-    "excellent",
-    "amazing",
-    "perfect",
-    "good",
-    "fantastic",
-    "recommend",
-    "value",
-    "satisfied",
-  ];
-  const negativeWords = [
-    "bad",
-    "terrible",
-    "awful",
-    "poor",
-    "broken",
-    "refund",
-    "return",
-    "disappointed",
-    "hate",
-    "worst",
-    "defective",
-  ];
+  const positiveWords = ["love", "great", "excellent", "amazing", "perfect", "good", "fantastic", "recommend", "value", "satisfied"];
+  const negativeWords = ["bad", "terrible", "awful", "poor", "broken", "refund", "return", "disappointed", "hate", "worst", "defective"];
 
   const pos = positiveWords.reduce((acc, w) => acc + (text.includes(w) ? 1 : 0), 0);
   const neg = negativeWords.reduce((acc, w) => acc + (text.includes(w) ? 1 : 0), 0);
@@ -155,16 +136,11 @@ async function callGroqForInsights(params: {
     "  \"confidence\": number\n" +
     "}\n\n" +
     "Rules:\n" +
-    "- sentiment_score MUST be between -1 and +1. Positive reviews push toward +1, negative toward -1.\n" +
-    "- confidence MUST be between 0 and 1, based on number of reviews and sentiment consistency. More reviews = higher confidence.\n" +
-    "- issues: extract specific product problems mentioned by customers (e.g. 'battery life', 'build quality').\n" +
-    "- strengths: extract specific product advantages praised by customers (e.g. 'sound quality', 'comfort').\n" +
-    "- improvements: suggest actionable product improvements based on review feedback.\n" +
-    "- Use concise, specific strings — not generic statements.\n" +
-    "- Output ONLY JSON (no markdown, no commentary).\n\n" +
-    `Product: ${params.productName}\nReal Customer Reviews:\n${params.reviews
-      .map((r, i) => `${i + 1}. ${r}`)
-      .join("\n")}`;
+    "- sentiment_score MUST be between -1 and +1.\n" +
+    "- confidence MUST be between 0 and 1.\n" +
+    "- Use concise, specific strings.\n" +
+    "- Output ONLY JSON.\n\n" +
+    `Product: ${params.productName}\nReal Customer Reviews:\n${params.reviews.map((r, i) => `${i + 1}. ${r}`).join("\n")}`;
 
   const body = {
     model: "llama-3.3-70b-versatile",
@@ -191,21 +167,15 @@ async function callGroqForInsights(params: {
         signal: controller.signal,
       });
 
-      if (!res.ok) {
-        throw new Error(`Groq API error: ${res.status}`);
-      }
+      if (!res.ok) throw new Error(`Groq API error: ${res.status}`);
 
       const data = (await res.json()) as any;
-      const content: unknown = data?.choices?.[0]?.message?.content;
-      if (typeof content !== "string") {
-        throw new Error("Groq response missing content");
-      }
+      const content = data?.choices?.[0]?.message?.content;
+      if (typeof content !== "string") throw new Error("Groq response missing content");
 
       const parsed = safeJsonParse(content);
       const normalized = normalizeInsights(parsed);
-      if (!normalized) {
-        throw new Error("Invalid JSON contract from LLM");
-      }
+      if (!normalized) throw new Error("Invalid JSON contract from LLM");
       return normalized;
     } finally {
       clearTimeout(timeout);
@@ -225,18 +195,18 @@ async function callGroqForInsights(params: {
 
 function calculateDemand(sentimentScore: number) {
   const base_demand = 50;
-  const demand = base_demand * (1 + 0.2 * clamp(sentimentScore, -1, 1));
+  const demand = base_demand * (1 + 0.3 * clamp(sentimentScore, -1, 1));
   return Math.round(demand);
 }
 
 function calculateInventory(demand: number, stock: number): { reorder: number; risk: RiskLabel } {
   if (demand > stock) {
     const reorder = demand - stock;
-    const risk: RiskLabel = demand >= stock * 2 && reorder >= 50 ? "Critical" : "High";
+    const risk: RiskLabel = demand >= stock * 2 && reorder >= 40 ? "Critical" : "High";
     return { reorder, risk };
   }
-  if (demand === stock) {
-    return { reorder: 10, risk: "Medium" };
+  if (demand >= stock * 0.8) {
+    return { reorder: Math.round(demand * 0.5), risk: "Medium" };
   }
   return { reorder: 0, risk: "Low" };
 }
@@ -246,54 +216,46 @@ function generateSupplierEmail(params: {
   reorder: number;
   risk: RiskLabel;
 }) {
-  const urgency =
-    params.risk === "Critical"
-      ? "URGENT"
-      : params.risk === "High"
-        ? "High Priority"
-        : params.risk === "Medium"
-          ? "Priority"
-          : "Standard";
-
-  const subject = `${urgency}: Restock Request — ${params.productName} (${params.reorder} units)`;
-  const tone =
-    params.risk === "Critical" || params.risk === "High"
-      ? "We are experiencing elevated demand and need an expedited restock."
-      : "Please process the following restock request.";
-
-  return [
-    `Subject: ${subject}`,
-    "",
-    "Hello Supplier Team,",
-    "",
-    `${tone}`,
-    "",
-    `Product: ${params.productName}`,
-    `Quantity: ${params.reorder}`,
-    `Urgency: ${params.risk}`,
-    "",
-    "Please confirm availability and estimated delivery timeline.",
-    "",
-    "Regards,",
-    "Inventory Team",
-  ].join("\n");
+  const urgency = params.risk === "Critical" ? "URGENT" : params.risk === "High" ? "High Priority" : "Standard";
+  const body = `Hello Supplier Team,\n\nWe require an immediate restock of ${params.reorder} units for ${params.productName} due to ${params.risk.toLowerCase()} inventory risk levels. Please confirm delivery by the earliest possible date.\n\nRegards,\nInventory Management`;
+  return `mailto:supplier@example.com?subject=${encodeURIComponent(`${urgency}: Restock Order - ${params.productName}`)}&body=${encodeURIComponent(body)}`;
 }
 
-function generateRestockPlan(params: { reorder: number; risk: RiskLabel }) {
-  const timeline =
-    params.risk === "Critical"
-      ? "within 24 hours"
-      : params.risk === "High"
-        ? "within 2 days"
-        : params.risk === "Medium"
-          ? "within 5 days"
-          : "as needed";
+async function sendProcurementEmail({
+  productName,
+  reorder,
+  risk,
+  sentiment_score,
+}: {
+  productName: string;
+  reorder: number;
+  risk: string;
+  sentiment_score: number;
+}) {
+  await resend.emails.send({
+    from: "StockSense AI <onboarding@resend.dev>",
+    to: "bhuvaneshwaritbsm@gmail.com",
+    subject: `Stock Alert: Reorder Required for ${productName}`,
+    html: `
+      <h2>Procurement Alert</h2>
+      <p><strong>Product:</strong> ${productName}</p>
+      <p><strong>Sentiment Score:</strong> ${sentiment_score}</p>
+      <p><strong>Risk Level:</strong> ${risk}</p>
+      <p><strong>Recommended Reorder:</strong> ${reorder} units</p>
+      <p>Based on strong customer sentiment and current stock risk, immediate restocking is recommended.</p>
+    `,
+  });
+}
 
-  return [
-    `Reorder ${params.reorder} units ${timeline}.`,
-    "Monitor demand trend daily and reassess stock weekly.",
-    "Set a reorder point alert to prevent future stock-outs.",
-  ].join(" ");
+function generateRestockPlan(params: { reorder: number; risk: RiskLabel; productName: string; stockout_days: number }) {
+  if (params.reorder === 0) {
+    return "Inventory levels are currently stable; maintain standard monitoring and reassess in 7 days.";
+  }
+  
+  const timeline = params.risk === "Critical" ? "within 24 hours" : params.risk === "High" ? "within 48 hours" : "this week";
+  const action = params.risk === "Critical" ? "expedited air freight" : "standard ground shipping";
+  
+  return `Initiate ${action} for ${params.reorder} units of ${params.productName} ${timeline} to mitigate the projected stockout in ${params.stockout_days} days.`;
 }
 
 function generateExplanation(params: {
@@ -303,19 +265,17 @@ function generateExplanation(params: {
   reorder: number;
   risk: RiskLabel;
 }) {
-  const score = clamp(params.sentiment_score, -1, 1);
-  const scoreStr = score.toFixed(2);
+  const sentimentDesc = params.sentiment_score > 0.4 ? "exceptionally positive" : params.sentiment_score > 0.1 ? "generally positive" : params.sentiment_score > -0.1 ? "neutral" : "concerning";
+  const gap = params.demand - params.stock;
+  
   if (params.reorder > 0) {
-    return `Sentiment is ${scoreStr} driving estimated demand of ${params.demand} vs current stock ${params.stock}. Stock is insufficient, so a reorder of ${params.reorder} units is recommended (risk: ${params.risk}).`;
+    return `Based on ${sentimentDesc} customer sentiment, we project a demand of ${params.demand} units, creating a deficit of ${gap} units against current stock. A reorder is necessary to maintain service levels.`;
   }
-  return `Sentiment is ${scoreStr} driving estimated demand of ${params.demand} vs current stock ${params.stock}. Current stock is sufficient, so no reorder is required (risk: ${params.risk}).`;
+  return `Current stock of ${params.stock} units effectively covers the projected demand of ${params.demand} units derived from ${sentimentDesc} customer feedback.`;
 }
 
 function calculateStockout(demand: number, stock: number): { daily_burn_rate: number; stockout_days: number; stockout_date: string } {
   const daily_burn_rate = Math.max(0.1, demand / 30);
-  if (stock === 0) {
-    return { daily_burn_rate: Math.round(daily_burn_rate * 10) / 10, stockout_days: 0, stockout_date: new Date().toISOString().split("T")[0] };
-  }
   const stockout_days = Math.floor(stock / daily_burn_rate);
   const stockoutDate = new Date();
   stockoutDate.setDate(stockoutDate.getDate() + stockout_days);
@@ -327,11 +287,7 @@ function calculateStockout(demand: number, stock: number): { daily_burn_rate: nu
 }
 
 function calculateBenchmark(sentimentScore: number): { sentiment_rank: number; sentiment_percentile: number; total_products_compared: number } {
-  const referenceScores = [
-    0.95, 0.85, 0.80, 0.75, 0.70, 0.65, 0.60, 0.55, 0.50, 0.45,
-    0.40, 0.35, 0.30, 0.25, 0.20, 0.15, 0.10, 0.05, 0.0, -0.05,
-    -0.10, -0.15, -0.20, -0.30, -0.40, -0.50, -0.60, -0.70, -0.80, -0.90,
-  ];
+  const referenceScores = [0.95, 0.85, 0.80, 0.75, 0.70, 0.65, 0.60, 0.55, 0.50, 0.45, 0.40, 0.35, 0.30, 0.25, 0.20, 0.15, 0.10, 0.05, 0.0, -0.05, -0.10, -0.15, -0.20, -0.30, -0.40, -0.50, -0.60, -0.70, -0.80, -0.90];
   const allScores = [...referenceScores, sentimentScore].sort((a, b) => b - a);
   const rank = allScores.indexOf(sentimentScore) + 1;
   const total = allScores.length;
@@ -351,28 +307,12 @@ export async function POST(req: Request) {
   const stock = body?.stock;
   const reviews = body?.reviews;
 
-  if (!isNonEmptyString(productName)) {
-    return NextResponse.json({ error: "productName is required" }, { status: 400 });
-  }
-  if (typeof stock !== "number" || Number.isNaN(stock) || stock < 0) {
-    return NextResponse.json({ error: "stock must be a non-negative number" }, { status: 400 });
-  }
-  if (!isStringArray(reviews) || reviews.length === 0 || reviews.every((r) => !isNonEmptyString(r))) {
-    return NextResponse.json({ error: "reviews must be a non-empty array" }, { status: 400 });
-  }
+  if (!isNonEmptyString(productName)) return NextResponse.json({ error: "productName required" }, { status: 400 });
+  if (typeof stock !== "number" || stock < 0) return NextResponse.json({ error: "invalid stock" }, { status: 400 });
+  if (!isStringArray(reviews) || reviews.length === 0) return NextResponse.json({ error: "reviews required" }, { status: 400 });
 
-  const cleanReviews = [...new Set(reviews.map((r) => r.trim()).filter((r) => r.length > 0))];
-  if (cleanReviews.length === 0) {
-    return NextResponse.json({ error: "reviews must be a non-empty array" }, { status: 400 });
-  }
-
-  const limitedReviews = cleanReviews.slice(0, 10);
-
-  const insights = await callGroqForInsights({
-    productName,
-    reviews: limitedReviews,
-    timeoutMs: 5000,
-  });
+  const cleanReviews = reviews.map(r => r.trim()).filter(r => r.length > 0);
+  const insights = await callGroqForInsights({ productName, reviews: cleanReviews.slice(0, 10), timeoutMs: 5000 });
 
   const demand = calculateDemand(insights.sentiment_score);
   const { reorder, risk } = calculateInventory(demand, stock);
@@ -380,22 +320,11 @@ export async function POST(req: Request) {
   const benchmark = calculateBenchmark(insights.sentiment_score);
 
   const email = generateSupplierEmail({ productName, reorder, risk });
-  const restock_plan = generateRestockPlan({ reorder, risk });
-  const explanation = generateExplanation({
-    sentiment_score: insights.sentiment_score,
-    demand,
-    stock,
-    reorder,
-    risk,
-  });
+  const restock_plan = generateRestockPlan({ reorder, risk, productName, stockout_days: stockout.stockout_days });
+  const explanation = generateExplanation({ sentiment_score: insights.sentiment_score, demand, stock, reorder, risk });
 
   const response: AnalyzeResponse = {
-    sentiment_score: clamp(insights.sentiment_score, -1, 1),
-    sentiment_label: insights.sentiment_label,
-    issues: insights.issues,
-    strengths: insights.strengths,
-    improvements: insights.improvements,
-    confidence: clamp(insights.confidence, 0, 1),
+    ...insights,
     demand,
     reorder,
     risk,
@@ -408,7 +337,22 @@ export async function POST(req: Request) {
     sentiment_rank: benchmark.sentiment_rank,
     sentiment_percentile: benchmark.sentiment_percentile,
     total_products_compared: benchmark.total_products_compared,
+    email_triggered: false,
   };
+
+  if (insights.sentiment_score > 0.5 && (risk === "High" || risk === "Critical")) {
+    try {
+      await sendProcurementEmail({
+        productName,
+        reorder,
+        risk,
+        sentiment_score: insights.sentiment_score,
+      });
+      response.email_triggered = true;
+    } catch (error) {
+      console.error("Email send failed:", error);
+    }
+  }
 
   return NextResponse.json(response);
 }

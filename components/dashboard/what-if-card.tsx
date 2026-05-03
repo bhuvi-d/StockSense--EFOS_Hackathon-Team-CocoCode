@@ -44,7 +44,7 @@ export function WhatIfCard() {
     <Card className="border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-950">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">What-If Simulator</CardTitle>
-        <SlidersHorizontal className="h-4 w-4 text-indigo-500" />
+        <SlidersHorizontal className="h-4 w-4 text-orange-500" />
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="space-y-2">
@@ -60,11 +60,11 @@ export function WhatIfCard() {
             value={activeStock}
             onChange={(e) => setSimStock(Number(e.target.value))}
             onMouseDown={() => setSimStock(activeStock)}
-            className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-zinc-200 dark:bg-zinc-700 accent-indigo-500"
+            className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-zinc-200 dark:bg-zinc-700 accent-orange-500"
           />
           <div className="flex justify-between text-[10px] text-zinc-400">
             <span>0</span>
-            <span className="text-indigo-500 font-medium">Break-even: {breakEvenStock}</span>
+            <span className="text-orange-500 font-medium">Break-even: {breakEvenStock}</span>
             <span>{Math.max(200, originalStock * 3)}</span>
           </div>
         </div>
@@ -84,7 +84,7 @@ export function WhatIfCard() {
         {isChanged && (
           <button
             onClick={() => setSimStock(null)}
-            className="text-[10px] text-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 underline"
+            className="text-[10px] text-orange-500 hover:text-orange-600 dark:hover:text-orange-400 underline"
           >
             Reset to actual stock ({originalStock})
           </button>

@@ -16,7 +16,7 @@ export function BenchmarkCard() {
     percentile >= 90
       ? { label: "Top Tier", color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-500" }
       : percentile >= 70
-        ? { label: "Above Average", color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-500" }
+        ? { label: "Above Average", color: "text-orange-600 dark:text-orange-400", bg: "bg-orange-500" }
         : percentile >= 40
           ? { label: "Average", color: "text-yellow-600 dark:text-yellow-400", bg: "bg-yellow-500" }
           : { label: "Below Average", color: "text-red-600 dark:text-red-400", bg: "bg-red-500" }

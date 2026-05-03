@@ -12,7 +12,7 @@ export function ExplanationCard() {
   return (
     <Card className="border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-950 col-span-full">
       <CardHeader className="flex flex-row items-center space-x-2">
-        <Info className="h-5 w-5 text-indigo-500" />
+        <Info className="h-5 w-5 text-orange-500" />
         <CardTitle className="text-lg font-bold">Why This Decision</CardTitle>
       </CardHeader>
       <CardContent>

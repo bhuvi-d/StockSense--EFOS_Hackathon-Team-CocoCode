@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverExternalPackages: ["jspdf", "canvg", "html2canvas"],
+  outputFileTracingIncludes: {
+    "/api/**": ["./stocksense.db"],
+  },
 };
 
 export default nextConfig;

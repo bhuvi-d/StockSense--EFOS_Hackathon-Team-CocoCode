@@ -40,7 +40,7 @@ export function InsightsCard() {
         </div>
 
         <div className="space-y-2">
-          <h4 className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 flex items-center">
+          <h4 className="text-sm font-semibold text-orange-600 dark:text-orange-400 flex items-center">
             <Lightbulb className="h-4 w-4 mr-2" /> Recommended Improvements
           </h4>
           <ul className="text-sm text-zinc-600 dark:text-zinc-400 space-y-1.5 pl-6 list-disc">

@@ -7,6 +7,7 @@ export type RiskLabel = "Low" | "Medium" | "High" | "Critical"
 
 export interface AnalysisData {
   productName: string
+  category?: string
   stock: number
   sentiment_score: number
   sentiment_label: SentimentLabel
@@ -29,6 +30,7 @@ export interface AnalysisData {
   sentiment_rank: number
   sentiment_percentile: number
   total_products_compared: number
+  email_triggered: boolean
 }
 
 interface AnalysisContextType {
