@@ -1,8 +1,9 @@
 import { InputForm } from "@/components/input-form"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Database, ArrowRight, Sparkles } from "lucide-react"
+import { Database, ArrowRight, Sparkles, Loader2 } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { Suspense } from "react"
 
 export default function Home() {
   return (
@@ -36,7 +37,13 @@ export default function Home() {
       
       <div className="w-full max-w-5xl mx-auto relative">
         <div className="absolute -inset-1 bg-gradient-to-r from-orange-500 to-amber-500 rounded-3xl blur opacity-20 dark:opacity-40 animate-tilt"></div>
-        <InputForm />
+        <Suspense fallback={
+          <div className="w-full h-96 bg-white dark:bg-zinc-950 rounded-3xl flex items-center justify-center border border-zinc-200 dark:border-zinc-800">
+            <Loader2 className="h-8 w-8 animate-spin text-orange-600" />
+          </div>
+        }>
+          <InputForm />
+        </Suspense>
       </div>
       
       <div className="mt-12 text-sm text-zinc-500 dark:text-zinc-500 flex items-center gap-4">
